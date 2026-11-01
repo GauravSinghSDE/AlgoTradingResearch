@@ -35,17 +35,22 @@ Think of it like a **flight simulator for algorithmic trading**:
    * **Max Risk Per Trade**: Ensures no single trade risks more than e.g. 2% of your account.
    * **Margin & Cash Checks**: Prevents entering positions if you lack the required cash (e.g. buying a NIFTY Futures lot requires ~₹1.2 Lakh; with ₹25,000 capital, the risk manager will safely reject it and explain why).
    * **Anti-Duplicate Rule**: Blocks entering the exact same position twice.
-5. **Paper Trading Engine**:
+5. **Paper Trading & MockBroker Engine**:
    * Simulates real-time order execution with virtual capital.
-   * Tracks open positions, unrealized P&L, realized P&L, and peak drawdown.
+   * Includes a deterministic `MockBroker` that simulates broker order acceptance, RMS price band rejections, and network timeouts.
+   * Supports **Partial Fills**: automatically computes the true weighted-average entry price across multiple fill ticks.
+   * **Automated Stop-Loss & Target Monitoring**: monitors incoming market prices and triggers simulated market exit fills when price levels are breached.
+   * **Broker Position Reconciliation**: compares local portfolio positions against broker books to detect and report mismatches.
    * Crash-recovery: saves state locally (`data/paper_state.json`) so if your computer restarts, your positions and portfolio are remembered.
-   * **Emergency Kill Switch**: Instantly halts paper trading and closes positions if triggered.
+   * **Emergency Kill Switch & Halt Policies**: supports `HOLD` (freeze new orders, retain positions) and `SQUARE_OFF` (flatten all open positions to cash).
 6. **Relational Database & Parquet Storage**:
    * Stores high-speed tick/candle data in Apache Parquet files.
    * Automatically logs every backtest and individual trade into an SQLite database (`data/algotrading.db`) via SQLAlchemy and Alembic migrations.
 7. **Interactive Web Dashboard & REST API**:
    * Beautiful Streamlit web interface with interactive Plotly charts, equity curves, drawdown graphs, and data health inspection.
    * High-performance FastAPI backend with full OpenAPI (`/docs`) swagger documentation.
+8. **End-to-End Lifecycle Validation Suite**:
+   * An automated 10-stage test suite and standalone CLI script (`scripts/validate_end_to_end.py`) that validates the complete strategy-to-broker-to-portfolio flow with zero real money.
 
 ---
 
@@ -149,7 +154,13 @@ Before doing anything, verify that the environment is 100% healthy:
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -v
 ```
-*You should see **39 passed** tests confirming the mathematics, risk checks, tax formulas, database, and API endpoints are working properly.*
+*You should see **50 passed** tests confirming the mathematics, risk checks, tax formulas, database, API endpoints, and end-to-end lifecycle.*
+
+### 3. Run the End-to-End Lifecycle Demonstration
+```powershell
+.\.venv\Scripts\python.exe scripts/validate_end_to_end.py
+```
+*Demonstrates all 10 stages in real time: strategy signal generation, risk checks, order intent journaling, mock broker RMS collar checks, partial fills with weighted-average prices, stop-loss execution, broker position reconciliation, crash recovery, duplicate timeout prevention, and emergency halt policies.*
 
 ---
 
@@ -280,7 +291,8 @@ Before ever connecting real money:
 | What You Want to Do | Command to Run in PowerShell |
 | :--- | :--- |
 | **Check system health** | `.\.venv\Scripts\python.exe scripts/verify_environment.py` |
-| **Run all 39 tests** | `.\.venv\Scripts\python.exe -m pytest -v` |
+| **Run all 50 tests** | `.\.venv\Scripts\python.exe -m pytest -v` |
+| **Run 10-stage lifecycle validation** | `.\.venv\Scripts\python.exe scripts/validate_end_to_end.py` |
 | **Run a strategy backtest** | `.\.venv\Scripts\python.exe scripts/run_backtest.py --strategy ma_crossover --instrument "NSE_FO|NIFTY24O3124500CE" --capital 25000` |
 | **Open the Web Dashboard** | `.\.venv\Scripts\streamlit.exe run app/dashboard/streamlit_app.py` |
 | **Start the REST API server** | `.\.venv\Scripts\uvicorn.exe app.main:app --reload` |
