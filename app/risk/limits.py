@@ -106,7 +106,7 @@ class RiskManager:
         order_cost = intent.quantity * current_price
         if intent.side == OrderSide.BUY:
             if order_cost > portfolio.cash:
-                reason = f"Insufficient free cash. Required ₹{order_cost:,.2f}, available cash ₹{portfolio.cash:,.2f}."
+                reason = f"Insufficient free cash. Required Rs. {order_cost:,.2f}, available cash Rs. {portfolio.cash:,.2f}."
                 logger.warning("Risk rejection: %s", reason)
                 return RiskValidationResult(
                     is_approved=False, rule_name="INSUFFICIENT_CASH", rejection_reason=reason
@@ -120,8 +120,8 @@ class RiskManager:
 
             if total_planned_risk > max_allowed_risk_amount:
                 reason = (
-                    f"Planned risk ₹{total_planned_risk:,.2f} exceeds maximum risk limit "
-                    f"₹{max_allowed_risk_amount:,.2f} ({self.max_risk_per_trade_pct}% of equity ₹{portfolio.equity:,.2f})."
+                    f"Planned risk Rs. {total_planned_risk:,.2f} exceeds maximum risk limit "
+                    f"Rs. {max_allowed_risk_amount:,.2f} ({self.max_risk_per_trade_pct}% of equity Rs. {portfolio.equity:,.2f})."
                 )
                 logger.warning("Risk rejection: %s", reason)
                 return RiskValidationResult(
