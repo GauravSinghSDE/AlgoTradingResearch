@@ -26,10 +26,25 @@ from app.paper_trading.engine import PaperTradingEngine
 
 
 def main() -> int:
+    import argparse
+    parser = argparse.ArgumentParser(description="Run simulated paper trading engine")
+    parser.add_argument("--strategy", default="ma_crossover", help="Strategy name")
+    parser.add_argument(
+        "--key", "--instrument", dest="key", default="NSE_FO|NIFTY24O3124500CE", help="Instrument key"
+    )
+    parser.add_argument("--capital", type=float, default=25000.0, help="Initial capital in INR")
+    parser.add_argument("--reset-state", action="store_true", help="Reset persisted paper trading state")
+    args = parser.parse_args()
+
     console = Console()
     console.print("[bold yellow]Starting Paper Trading Session (Simulated Only)...[/bold yellow]")
 
-    engine = PaperTradingEngine()
+    state_path = Path("data/paper_state.json")
+    if args.reset_state and state_path.exists():
+        state_path.unlink()
+        console.print("[yellow]Cleared prior paper trading state file.[/yellow]")
+
+    engine = PaperTradingEngine(initial_capital=args.capital)
     portfolio = engine.portfolio
 
     console.print(f"Current Cash: Rs. {portfolio.cash:,.2f}")
@@ -38,7 +53,7 @@ def main() -> int:
 
     # Simulated instrument (e.g. NIFTY 24500 CE)
     instrument = BaseInstrument(
-        instrument_key="NSE_FO|NIFTY24O3124500CE",
+        instrument_key=args.key,
         trading_symbol="NIFTY 24500 CE",
         name="NIFTY",
         segment=Segment.NSE_FO,

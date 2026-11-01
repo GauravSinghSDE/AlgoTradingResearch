@@ -34,7 +34,9 @@ def main() -> int:
     parser.add_argument(
         "--strategy", default="ma_crossover", choices=list(STRATEGY_REGISTRY.keys())
     )
-    parser.add_argument("--key", required=True, help="Instrument key with cached data")
+    parser.add_argument(
+        "--key", "--instrument", dest="key", required=True, help="Instrument key with cached data"
+    )
     parser.add_argument(
         "--interval", default="1minute", choices=["1minute", "5minute", "15minute", "day"]
     )

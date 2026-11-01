@@ -27,7 +27,9 @@ from app.domain.candles import CandleInterval
 
 async def main() -> int:
     parser = argparse.ArgumentParser(description="Download historical candles from Upstox")
-    parser.add_argument("--key", required=True, help="Instrument key, e.g. 'NSE_INDEX|Nifty 50'")
+    parser.add_argument(
+        "--key", "--instrument", dest="key", required=True, help="Instrument key, e.g. 'NSE_INDEX|Nifty 50'"
+    )
     parser.add_argument(
         "--interval",
         default="1minute",
