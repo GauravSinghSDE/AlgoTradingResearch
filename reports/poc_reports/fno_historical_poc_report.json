@@ -1,0 +1,12 @@
+{
+  "run_timestamp": "2026-10-15T00:12:39.319885",
+  "broker": "Upstox",
+  "has_access_token": false,
+  "underlying": "NSE_INDEX|Nifty 50",
+  "steps": {
+    "authentication": "SKIPPED_NO_TOKEN"
+  },
+  "limitations": [
+    "Live API call skipped: UPSTOX_ACCESS_TOKEN not present. Run verify_upstox_auth.py with active token."
+  ]
+}
